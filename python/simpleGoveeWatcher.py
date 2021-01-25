@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 
-from time import sleep
+from time import sleep, gmtime, strftime
 import os
 import sys
 
 from bleson import get_provider, Observer, UUID16
-from bleson.logger import log, set_level, ERROR, DEBUG
+from bleson.logger import log, set_level, ERROR, DEBUG, WARNING
+
+
+#set_level(WARNING)
+
 
 # Disable warnings
 set_level(ERROR)
@@ -20,7 +24,6 @@ GOVEE_BT_mac_OUI_PREFIX = "A4:C1:38"
 
 #H5075_UPDATE_UUID16 = UUID16(0xEC88)
 H5075_UPDATE_UUID16 = 'UUID16(0xec88)'
-
 
 govee_devices = {}
 
@@ -42,9 +45,6 @@ def decode_temp_in_f(encoded_data):
 def decode_humidity(encoded_data):
     return format(((encoded_data % 1000) / 10), FORMAT_PRECISION)
 
-
-from time import gmtime, strftime
-
 # On BLE advertisement callback
 def on_advertisement(advertisement):
     
@@ -52,26 +52,17 @@ def on_advertisement(advertisement):
 
     if advertisement.address.address.startswith(GOVEE_BT_mac_OUI_PREFIX):
         mac = advertisement.address.address
-        #print("===>")
-        #print(advertisement.uuid16s)
-        #print("---------")
-        #if mac not in govee_devices:
-        #    govee_devices[mac] = {}
-        #if H5075_UPDATE_UUID16 in advertisement.uuid16s:
         if len(advertisement.uuid16s)>0:
             current_time = strftime("%Y-%m-%d %H:%M:%S", gmtime())
-
-            # HACK:  Proper decoding is done in bleson > 0.10
-            #print(advertisement.name, "Data:", advertisement.mfg_data, "RSSI:", advertisement.rssi)
-
-            print(current_time, advertisement.mfg_data, "RSSI:", advertisement.rssi)
-
-
-
-        #log.debug(govee_devices[mac])
+            encoded_data = int(advertisement.mfg_data.hex()[6:12], 16)
+            battery = int(advertisement.mfg_data.hex()[12:14], 16)
+            temp = decode_temp_in_c(encoded_data)
+            humidity = decode_humidity(encoded_data)
+            print(f'{current_time}, T={temp}, H={humidity}, RSSI: {advertisement.rssi}')
+               
 
 
-# ###########################################################################
+#############################################################################
 
 
 adapter = get_provider().get_adapter()
