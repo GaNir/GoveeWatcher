@@ -26,3 +26,13 @@ It will collect information for 3 seconds and print the values for each device i
 GVH5075_XXXX (A4:C1:38:XX:XX:XX) - 20.52C / 68.93F  - Humidity: 15.00%
 GVH5075_XXXX (A4:C1:38:XX:XX:XX) - RSSI: -62
 ```
+
+
+## Virtual Environment
+To run on virtual environment as sudo use: 
+```shell
+  sudo [path to virtual env python interpreter] simpleGoveeWatcher.py 
+  #e.g. 
+  # sudo ~/dev/env_dev/bin/python simpleGoveeWatcher.py 
+```
+
